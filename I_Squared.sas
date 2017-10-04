@@ -99,14 +99,14 @@
 %let dsid = %sysfunc(open(&dataset, IS));
 %if &dsid = 0 %then %do;
 	%put ERROR: data set &dataset cannot be opened;
-    stop;
-    %end;
+	stop;
+	%end;
 
 /* Get the number of studies in the input dataset */
 %local n_subj;
 proc sql noprint;
-    select count(distinct(&study_name)) into:n_subj
-        from &dataset;
+	select count(distinct(&study_name)) into:n_subj
+		from &dataset;
 
 /* Get the number of observations in the input dataset */
 
@@ -115,18 +115,17 @@ proc sql noprint;
 /* you can get the number of observations directly without counting */
 %let anobs = %sysfunc(attrn(&dsid, ANOBS));
 %let whstmt = %sysfunc(attrn(&dsid, WHSTMT));
-%if &anobs = 1 & &whstmt = 0 %then
-    %do;
-    %let n_obs = %sysfunc(attrn(&dsid, NLOBS));
-    %end;
+%if &anobs = 1 & &whstmt = 0 %then %do;
+	%let n_obs = %sysfunc(attrn(&dsid, NLOBS));
+	%end;
 
 /* If SAS doesn't know the number of observations, */
 /* or if you’re using a WHERE clause, */
 /* you can obtain the answer by iterating through the data set */
 %else
-    %do %while (%sysfunc(fetch(&DSID)) = 0);
-    %let n_obs = %eval(&counted. + 1);
-    %end;
+	%do %while (%sysfunc(fetch(&DSID)) = 0);
+	%let n_obs = %eval(&counted. + 1);
+	%end;
 
 /* Get the average number of observations among all of the studies */
 %local n_aver;
@@ -140,7 +139,7 @@ proc iml;
 	beta1_est = Est[{2}, ];
 
     /* specify population mean and covariance */
-    Mean = {0, 0};
+	Mean = {0, 0};
 	use &g_mat;
 		read all var {Col1 Col2} into Cov;
 
@@ -159,8 +158,8 @@ proc iml;
 	end;	
 	
 	/* simulation*/
-    call randseed(4321);
-    Mu = RandNormal(&n_obs, Mean, Cov);
+	call randseed(4321);
+	Mu = RandNormal(&n_obs, Mean, Cov);
 	Mu_0 = Mu[ ,{1}];
 	Mu_1 = Mu[ ,{2}];
 
