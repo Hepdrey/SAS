@@ -42,9 +42,9 @@
 	study_name	= the variable in the dataset identifying each study
 	x_name		= the variable in the dataset indicating the exposure status
 	paraest_mat	= the name given to the ParameterEstimates= data set in the ODS OUTPUT statement;
-				  stores the estimated parameters beta0 and beta1
+			  stores the estimated parameters beta0 and beta1
 	g_mat		= the name given to the G= data set in the ODS OUTPUT statement;
-				  stores the estimated covariance matrix of Mu_0 and Mu_1
+			  stores the estimated covariance matrix of Mu_0 and Mu_1
    
    NOTES:
 	Please do the following with your original PROC GLIMMIX step:
