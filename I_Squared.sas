@@ -1,31 +1,31 @@
 %macro I_Squared(	dataset=,
-					subj_id_name=,
-					x_name=,
-					paraest_mat=,
-					g_mat=
-				)
-				/ minoperator;
+			study_name=,
+			x_name=,
+			paraest_mat=,
+			g_mat=
+		)
+		/ minoperator;
 
-/******************/
-/*  GNU licenses  */
-/******************/
+/*****************/
+/*  GNU licenses */
+/*****************/
 
 /* 
 	Copyright © 2017 Zhaoxue Tong
 	Zhaoxue Tong, Renmin University of China, October 2017
 	
 	This SAS macro is free software: you can redistribute it and/or modify
-    	it under the terms of the GNU General Public License as published by
-    	the Free Software Foundation, either version 3 of the License, or
-   	(at your option) any later version.
-
-    	This SAS macro is distributed in the hope that it will be useful,
-    	but WITHOUT ANY WARRANTY; without even the implied warranty of
-    	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    	GNU General Public License for more details.
-
-    	You should have received a copy of the GNU General Public License
-    	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This SAS macro is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*******************/
@@ -38,13 +38,13 @@
 	meta-analysis with binary outcomes
 
    REQUIRED ARGUMENTS:
-	dataset      	= the input dataset
-	subj_id_name 	= the variable in the dataset identifying each subject
-	x_name       	= the variable in the dataset indicating the exposure status
-	paraest_mat		= the name given to the ParameterEstimates= data set in the ODS OUTPUT statement;
-					  stores the estimated parameters beta0 and beta1
-	g_mat			= the name given to the G= data set in the ODS OUTPUT statement;
-					  stores the estimated covariance matrix of Mu_0 and Mu_1
+	dataset		= the input dataset
+	study_name	= the variable in the dataset identifying each study
+	x_name		= the variable in the dataset indicating the exposure status
+	paraest_mat	= the name given to the ParameterEstimates= data set in the ODS OUTPUT statement;
+				  stores the estimated parameters beta0 and beta1
+	g_mat		= the name given to the G= data set in the ODS OUTPUT statement;
+				  stores the estimated covariance matrix of Mu_0 and Mu_1
    
    NOTES:
 	Please do the following with your original PROC GLIMMIX step:
@@ -55,10 +55,11 @@
 		- include a statement of the form 'ods output ParameterEstimates=<ds1> G=<ds2>;' to produce the 
 		  input data sets for this macro
 	Example:
-		proc glimmix data = try;
-  		model label = x1 / solution;
-  		random int x1 / sub = subj_id type = un g;
-  		ods output ParameterEstimates = para_est G = g_matrix;
+		proc glimmix 
+			data = try;
+  			model label = x1 / solution;
+  			random int x1 / sub = subj_id type = un g;
+  			ods output ParameterEstimates = para_est G = g_matrix;
 		run;
 
    OUTPUT:
@@ -74,7 +75,7 @@
 %mend checkpara;
 
 %checkpara(&dataset, dataset);
-%checkpara(&subj_id_name, subj_id_name);
+%checkpara(&study_name, study_name);
 %checkpara(&x_name, x_name);
 %checkpara(&paraest_mat, paraest_mat);
 %checkpara(&g_mat, g_mat);
@@ -104,7 +105,7 @@
 /* Get the number of studies in the input dataset */
 %local n_subj;
 proc sql noprint;
-    select count(distinct(&subj_id_name)) into:n_subj
+    select count(distinct(&study_name)) into:n_subj
         from &dataset;
 
 /* Get the number of observations in the input dataset */
@@ -182,30 +183,3 @@ proc iml;
 quit;
 
 %mend I_Squared;
-
-/* Example */
-%let path = "E:\i2\g5.csv";
-
-proc import
-	datafile = &path
-	dbms = csv
-	out = temp
-	replace;
-run;
-
-options memcache = 1;
-
-proc glimmix
-	data = temp;
-	model label = Group5_tx age gender HIV extent / solution;
-	random int Group5_tx / sub = subj_id type = un g;
-	ods output ParameterEstimates = para_est G = g_matrix;
-run;
-
-%I_Squared(	dataset=temp, 
-		subj_id_name=subj_id, 
-		x_name=Group5_tx, 
-		paraest_mat=para_est,
-		g_mat=g_matrix);
-
-options memcache = 0;
