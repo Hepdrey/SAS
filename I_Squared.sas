@@ -6,6 +6,32 @@
 				)
 				/ minoperator;
 
+/******************/
+/*  GNU licenses  */
+/******************/
+
+/* 
+	Copyright Â© 2017 Zhaoxue Tong
+	Zhaoxue Tong, Renmin University of China, October 2017
+	
+	This SAS macro is free software: you can redistribute it and/or modify
+    	it under the terms of the GNU General Public License as published by
+    	the Free Software Foundation, either version 3 of the License, or
+   	(at your option) any later version.
+
+    	This SAS macro is distributed in the hope that it will be useful,
+    	but WITHOUT ANY WARRANTY; without even the implied warranty of
+    	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    	GNU General Public License for more details.
+
+    	You should have received a copy of the GNU General Public License
+    	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*******************/
+/* About the macro */
+/*******************/
+
 /* 
    PURPOSE:
 	Computes estimated I-squared statistic for one-stage individual participant data 
@@ -84,7 +110,7 @@ proc sql noprint;
 /* Get the number of observations in the input dataset */
 
 /* If SAS knows how many observations are in the data set, */
-/* and if there’s no WHERE clause, */
+/* and if thereâ€™s no WHERE clause, */
 /* you can get the number of observations directly without counting */
 %let anobs = %sysfunc(attrn(&dsid, ANOBS));
 %let whstmt = %sysfunc(attrn(&dsid, WHSTMT));
@@ -94,7 +120,7 @@ proc sql noprint;
     %end;
 
 /* If SAS doesn't know the number of observations, */
-/* or if you’re using a WHERE clause, */
+/* or if youâ€™re using a WHERE clause, */
 /* you can obtain the answer by iterating through the data set */
 %else
     %do %while (%sysfunc(fetch(&DSID)) = 0);
