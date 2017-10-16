@@ -103,9 +103,9 @@
 	%end;
 
 /* Get the number of studies in the input dataset */
-%local n_subj;
+%local n_study;
 proc sql noprint;
-	select count(distinct(&study_name)) into:n_subj
+	select count(distinct(&study_name)) into:n_study
 		from &dataset;
 
 /* Get the number of observations in the input dataset */
@@ -129,7 +129,7 @@ proc sql noprint;
 
 /* Get the average number of observations among all of the studies */
 %local n_aver;
-%let n_aver = %sysevalf(&n_obs / &n_subj);
+%let n_aver = %sysevalf(&n_obs / &n_study);
 
 proc iml;
 	/* specify estimated parameters */
