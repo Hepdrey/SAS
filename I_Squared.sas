@@ -1,6 +1,6 @@
 %macro I_Squared(	dataset=,
-			study_name=,
-			x_name=,
+			study_id=,
+			exposure=,
 			paraest_mat=,
 			g_mat=
 		)
@@ -39,8 +39,8 @@
 
    REQUIRED ARGUMENTS:
 	dataset		= the input dataset
-	study_name	= the variable in the dataset identifying each study
-	x_name		= the variable in the dataset indicating the exposure status
+	study_id	= the variable in the dataset identifying each study
+	exposure	= the variable in the dataset indicating the exposure status
 	paraest_mat	= the name given to the ParameterEstimates= data set in the ODS OUTPUT statement;
 			  stores the estimated parameters beta0 and beta1
 	g_mat		= the name given to the G= data set in the ODS OUTPUT statement;
@@ -66,31 +66,37 @@
 	Estimated I-squared statistic
 */
 
+/* Generate macro variable for output */
+data _null_;
+set &dataset;
+call symput('exposure_name',vlabel(&exposure));
+run; 
+
 /* Check whether all the required macro parameters are specified */
-%macro checkpara(paravalue, paraname);
+%macro I_squared_checkpara(paravalue, paraname);
 	%if %length(&paravalue) = 0 %then %do;
 		%put ERROR: Value for macro parameter &paraname is missing;
-		stop;
+		%abort;
 		%end;
-%mend checkpara;
+%mend I_squared_checkpara;
 
-%checkpara(&dataset, dataset);
-%checkpara(&study_name, study_name);
-%checkpara(&x_name, x_name);
-%checkpara(&paraest_mat, paraest_mat);
-%checkpara(&g_mat, g_mat);
+%I_squared_checkpara(&dataset, dataset);
+%I_squared_checkpara(&study_id, study_id);
+%I_squared_checkpara(&exposure, exposure);
+%I_squared_checkpara(&paraest_mat, paraest_mat);
+%I_squared_checkpara(&g_mat, g_mat);
 
 /* Check whether the data set exists */
-%macro checkdataset(dset);
+%macro I_squared_checkdataset(dset);
 	%if %sysfunc(exist(&dset)) = 0 %then %do;
 	%put ERROR: data set &dset does not exist;
-	stop;
+	%abort;
 	%end;
-%mend checkdataset;
+%mend I_squared_checkdataset;
 
-%checkdataset(&dataset);
-%checkdataset(&paraest_mat);
-%checkdataset(&g_mat);
+%I_squared_checkdataset(&dataset);
+%I_squared_checkdataset(&paraest_mat);
+%I_squared_checkdataset(&g_mat);
 	
 %local dsid anobs whstmt n_obs n_aver;
 %let n_obs = 0;
@@ -105,7 +111,7 @@
 /* Get the number of studies in the input dataset */
 %local n_study;
 proc sql noprint;
-	select count(distinct(&study_name)) into:n_study
+	select count(distinct(&study_id)) into:n_study
 		from &dataset;
 
 /* Get the number of observations in the input dataset */
@@ -167,17 +173,19 @@ proc iml;
 	v1 = var(v_1);
 
 	use &dataset;
-	read all var {&x_name} into x;
+	read all var {&exposure} into x;
 	y_est = (beta0_est + Mu_0) + (beta1_est + Mu_1)#x;
 	p_est = 1 / (1+exp(-y_est));
-	v_2 = 1 / &n_aver*p_est#(1-p_est);
+	v_2 = 1 / (&n_aver*p_est#(1-p_est));
 	v2 = mean(v_2);
 
 	title "I Squared";
 	i_squared_est = v1 / (v1 + v2);
-	print i_squared_est;
+	print "&exposure_name" i_squared_est v1 v2;
 
 	title;
+
+%let rc = %sysfunc(close(&dsid));
 
 quit;
 
